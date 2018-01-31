@@ -25,7 +25,10 @@ class SubprocessBackend(MetaMap):
 
     def extract_concepts(self, sentences=None, ids=None,
                          composite_phrase=4, filename=None,
-                         file_format='sldi', allow_acronym_variants=False,
+                         file_format='sldi',
+                         silent=False,
+                         disorder_group_only=False,
+                         allow_acronym_variants=False,
                          word_sense_disambiguation=False, allow_large_n=False,
                          no_derivational_variants=False,
                          derivational_variants=False, ignore_word_order=False,
@@ -93,6 +96,9 @@ class SubprocessBackend(MetaMap):
                     raise ValueError("mm_data_version must be Base, USAbase, or NLM.")
                 command.append('-V')
                 command.append(str(mm_data_version))
+
+            if disorder_group_only:
+               command.append('-J acab,anab,comd,cgab,dsyn,emod,inpo,mobd,neop,patf,sosy')
             if word_sense_disambiguation:
                 command.append('-y')
             if allow_large_n:
@@ -121,7 +127,11 @@ class SubprocessBackend(MetaMap):
             command.append(input_file.name)
             command.append(output_file.name)
 
-            metamap_process = subprocess.Popen(command, stdout=subprocess.PIPE)
+            print('command sent to metamap:', ' '.join(command))
+            if silent:
+                metamap_process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            else:
+                metamap_process = subprocess.Popen(command, stdout=subprocess.PIPE)
             while metamap_process.poll() is None:
                 stdout = str(metamap_process.stdout.readline())
                 if 'ERROR' in stdout:
