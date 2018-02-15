@@ -16,12 +16,10 @@ FIELD_NAMES_MMI = ('index', 'mm', 'score', 'preferred_name', 'cui', 'semtypes',
                'trigger', 'location', 'pos_info', 'tree_codes')
 
 FIELD_NAMES_AA = ('index', 'aa', 'short_form', 'long_form', 'num_tokens_short_form',
-                  'num_chars_short_form', 'num_tokens_long_form',
-                  'num_chars_long_form', 'pos_info')
+                  'num_chars_short_form', 'num_tokens_long_form','num_chars_long_form', 'pos_info')
 
 FIELD_NAMES_UA = ('index', 'ua', 'short_form', 'long_form', 'num_tokens_short_form',
-                  'num_chars_short_form', 'num_tokens_long_form',
-                  'num_chars_long_form', 'pos_info')
+                  'num_chars_short_form', 'num_tokens_long_form','num_chars_long_form', 'pos_info')
 
 class ConceptMMI(namedtuple('Concept', FIELD_NAMES_MMI)):
     def __repr__(self):
