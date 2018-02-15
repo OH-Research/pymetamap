@@ -23,7 +23,7 @@ class SubprocessBackend(MetaMap):
         """
         MetaMap.__init__(self, metamap_filename, version)
 
-    def extract_concepts(self, sentences=None, ids=None,
+    def extract_concepts(self, document=None, sentences=None, ids=None,
                          composite_phrase=4, filename=None,
                          file_format='sldi',
                          silent=False,
@@ -64,21 +64,26 @@ class SubprocessBackend(MetaMap):
         if allow_acronym_variants and unique_acronym_variants:
             raise ValueError("You can't use both allow_acronym_variants and "
                              "unique_acronym_variants.")
-        if (sentences is not None and filename is not None) or \
-                (sentences is None and filename is None):
+        if (sentences is None and filename is None and document is None) or \
+                (sentences is not None and filename is not None) or \
+                (sentences is not None and document is not None) or \
+                (document is not None and filename is not None):
             raise ValueError("You must either pass a list of sentences "
-                             "OR a filename.")
+                             "OR a filename OR a document text")
         if file_format not in ['sldi','sldiID']:
             raise ValueError("file_format must be either sldi or sldiID")
 
         input_file = None
-        if sentences is not None:
+        if sentences is not None or document is not None:
             input_file = tempfile.NamedTemporaryFile(mode="wb", delete=False)
         else:
             input_file = open(filename, 'r')
         output_file = tempfile.NamedTemporaryFile(mode="r", delete=False)
         error = None
         try:
+            if document is not None:
+                input_file.write(document.encode('utf8'))
+                input_file.flush()
             if sentences is not None:
                 if ids is not None:
                     for identifier, sentence in zip(ids, sentences):
@@ -122,7 +127,7 @@ class SubprocessBackend(MetaMap):
             if ids is not None or (file_format == 'sldiID' and
                     sentences is None):
                 command.append('--sldiID')
-            else:
+            elif document is None:
                 command.append('--sldi')
             command.append(input_file.name)
             command.append(output_file.name)
@@ -139,8 +144,9 @@ class SubprocessBackend(MetaMap):
                     error = stdout.rstrip()
             output = str(output_file.read())
         finally:
-            if sentences is not None:
+            if sentences is not None or document is not None:
                 os.remove(input_file.name)
+                pass
             else:
                 input_file.close()
             os.remove(output_file.name)
